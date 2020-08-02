@@ -4,7 +4,7 @@
 #Mai: 1151980610@qq.com
 #Function:  This script is used for system Centos6 or Centos7 initialization 
 #Version:  V1.0
-#Update:  2019-10-09
+#Update:  2020-05-12
 
 . /etc/init.d/functions
 
@@ -262,17 +262,17 @@ add_user(){
 #set sshd
 ssh_config(){
     mv -f /etc/ssh/sshd_config /etc/ssh/sshd_config_$$
+    inner_ip=`/sbin/ifconfig -a|grep inet|grep -v 127.0.0.1|grep -v inet6|awk '{print $2}'|tr -d "addr:"|head -n1`
     cat >/etc/ssh/sshd_config<<EOF
-Port 33389
-ListenAddress 0.0.0.0:22
+ListenAddress ${inner_ip}:22
 ListenAddress 0.0.0.0:33389
 HostKey /etc/ssh/ssh_host_rsa_key
 HostKey /etc/ssh/ssh_host_ecdsa_key
 HostKey /etc/ssh/ssh_host_ed25519_key
 SyslogFacility AUTHPRIV
 MaxAuthTries 10
-#PermitRootLogin no    #禁用root 登录
-#RSAAuthentication yes #通过RSA认证
+PermitRootLogin no    #打开注释，表示禁用root登录，添加#注释表示允许root登录，目前表示禁止root登录
+RSAAuthentication yes #通过RSA认证
 PubkeyAuthentication yes
 AuthorizedKeysFile      %h/.ssh/authorized_keys
 #PasswordAuthentication no #禁止密码方式验证
@@ -353,6 +353,11 @@ net.ipv4.tcp_mem = 94500000 915000000 927000000
 net.ipv4.tcp_keepalive_time = 30
 net.ipv4.ip_local_port_range = 1024 65000
 vm.overcommit_memory = 1
+vm.dirty_background_ratio = 5
+vm.dirty_ratio = 10
+vm.max_map_count = 262144
+net.bridge.bridge-nf-call-ip6tables = 1
+net.bridge.bridge-nf-call-iptables = 1
 EOF
     /sbin/sysctl -p
     source /etc/profile

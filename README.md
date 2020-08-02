@@ -41,14 +41,41 @@ git push -u origin master
 
 git push origin master 
 
-
-git删除文件并推送
+6.git删除文件并推送
 git rm * -r
 
 git commit -m "clear"
 
-git push origin master 
+git push origin master
+
+7.git重命名文件夹(例如我想把Zabbix目录改成zabbix,不能直接git mv Zabbix zabbix, 可以使用中转方式，先改成临时的一个目录，然后再改回zabbix)
+git config core.ignorecase false  #关闭git忽略大小写配置，即可检测到大小写名称更改
+git mv -f Zabbix tmpfolder
+git mv -f tmpfolder zabbix
+git add -u zabbix  #(-u选项会更新已经追踪的文件和文件夹)
+git commit -m "changed the Zabbix to zabbix"
+
+8.Git 设置和取消代理
+#全局代理
+git config --global http.proxy 'socks5://127.0.0.1:1080'
+git config --global https.proxy 'socks5://127.0.0.1:1080'
+
+#还有针对 github.com 的单独配置
+git config --global http.https://github.com.proxy socks5://127.0.0.1:1080
+
+#取消代理
+git config --global --unset http.https://github.com.proxy
+
+#取消代理
+git config --global --unset http.proxy
+git config --global --unset https.proxy
+
+git config --global --unset http.https.proxy
+
+#查看git配置
+git config -l
 ```
+
 参考：http://blog.csdn.net/liang0000zai/article/details/50724632
 
 
@@ -192,8 +219,15 @@ cp -rp vue-element-admin/. /opt/mysite/frontend     一定要有这个 . 才能�
 cp -a vue-element-admin/. /opt/mysite/frontend
 cp -rf vue-element-admin/. /opt/mysite/frontend
 
-
 rm -rf .*   删除隐藏文件
+```
+
+# 八、临时edu邮箱申请
+
+```bash
+https://wangdalao.com/page/2?s=edu&type=post
+
+https://51.ruyo.net/
 ```
 
 https://blog.csdn.net/zhaoyanjun6/article/details/72284974 GitHub 实现多人协同提交代码并且权限分组管理

@@ -33,7 +33,7 @@ listen_port=21
 pasv_enable=YES
 pasv_min_port=10000
 pasv_max_port=20000
-pasv_address=103.106.208.242
+pasv_address=11.106.22.215
 pasv_addr_resolve=YES
 reverse_lookup_enable=NO
 pasv_promiscuous=YES
@@ -79,6 +79,9 @@ systemctl status  vsftpd.service
 yum -y install ftp
 
 ftp 103.106.20X.XX
+
+#使用安全设置列出目录
+ftp>ls
 ```
 
 # 五、报错解决
@@ -111,6 +114,61 @@ https://www.cnblogs.com/hisunhyx/p/5029476.html?utm_source=tuicool&utm_medium=re
 https://www.cnblogs.com/ajianbeyourself/p/7655464.html
 ```
 
+# 七、nginx代理ftp图片
+```bash
+cat >/etc/nginx/conf.d/ftp.conf<<\EOF
+server {
+    listen       80;
+    server_name  localhost;
+
+    #charset koi8-r;
+    access_log  /var/log/nginx/host.access.log  main;
+
+    location /pub/banner/ {
+       alias /data0/ftpfile/pub/banner/;
+       index  index.html index.htm;
+       autoindex on;
+    }
+
+    location /bitcoin360/ {
+       alias /data0/ftpfile/bitcoin360/;
+       index  index.html index.htm;
+       autoindex on;
+    }
+}
+EOF
+
+# 443 配置
+
+server {
+    listen       80;
+    listen 443 ssl;
+    server_name  ftp.coin.io;
+
+    ssl_certificate      /etc/nginx/certs/coin.pem;
+    ssl_certificate_key  /etc/nginx/certs/coin.key;
+    ssl_session_timeout 5m;
+    ssl_ciphers ECDHE-RSA-AES128-GCM-SHA256:ECDHE:ECDH:AES:HIGH:!NULL:!aNULL:!MD5:!ADH:!RC4;
+    ssl_protocols TLSv1.1 TLSv1.2;
+    ssl_prefer_server_ciphers on;
+
+    #charset koi8-r;
+    access_log  /var/log/nginx/ftp.coin.io.log  main;
+    error_log /var/log/nginx/ftp.coin.io.error.log;
+
+    location /pub/banner/ {
+       alias /data0/ftpfile/pub/banner/;
+       index  index.html index.htm;
+       autoindex on;
+    }
+
+    location /coin/ {
+       alias /data0/ftpfile/coin/;
+       index  index.html index.htm;
+       autoindex on;
+    }
+}
+```
 参考资料：
 
 https://www.cnblogs.com/tdalcn/p/6940147.html  

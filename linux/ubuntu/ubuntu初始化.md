@@ -49,17 +49,51 @@ useradd www -m -d /home/www
 www:x:1001:1001::/home/www:/bin/bash
 ```
 
+# 二、磁盘格式化
 
-# 二、修改主机名
+```bash
+cat > /tmp/disk.sh << \EOF
+#!/bin/bash
+echo "n
+p
+1
+
+
+w
+" | fdisk /dev/nvme1n1 && mkfs.xfs /dev/nvme1n1p1
+echo '/dev/nvme1n1p1 /data0                  xfs    defaults        0 0' >> /etc/fstab
+mkdir /data0
+mount /dev/nvme1n1p1 /data0
+df -h
+EOF
+
+chmod +x /tmp/disk.sh && sh /tmp/disk.sh
+mkdir -p /data0/{opt,logs}
+ln -s /data0/logs/ /opt/logs
+chown -R www:www /data0/
+chown -R www:www /opt/logs
+mv /home/ /data0/
+ln -s /data0/home/ /home
+ls -l /data0/
+ls -l /opt/
+ls -l /home/
+
+#注意aws的磁盘格式化，在mkfs.xfs阶段会有点慢，需要手动执行下，然后执行mount -a重新挂载下
+```
+
+# 三、修改主机名
 
 ```
 https://www.cnblogs.com/zeusmyth/p/6231350.html
 
-vim /etc/hostname
+cat > /etc/hostname << EOF
+hk-ubuntu-188
+EOF
+hostname hk-ubuntu-188
 ```
 
 
-# 三、脚本
+# 四、脚本
 ```
 sudo apt update -y
 sudo apt upgrade -y
@@ -89,7 +123,7 @@ vim /etc/profile
 export PS1="\[\e]0;\a\]\n\[\e[1;32m\]\[\e[1;33m\]\H\[\e[1;35m\]<\$(date +\"%Y-%m-%d %T\")> \[\e[32m\]\w\[\e[0m\]\n\u>\\$ "
 ```
 
-# 四、sshd配置
+# 五、sshd配置
 ```
 cat > /etc/ssh/sshd_config << \EOF
 Port 33389
@@ -128,7 +162,7 @@ EOF
 systemctl restart sshd
 ```
 
-# 五、防火墙配置
+# 六、防火墙配置
 ```
 sudo apt-get install -y ufw
 sudo ufw reset
